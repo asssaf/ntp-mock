@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM alpine:edge
 
 # latest certs
 RUN apk add ca-certificates --no-cache && update-ca-certificates
@@ -10,12 +10,11 @@ RUN apk add --update tzdata --no-cache &&\
     echo $TZ > /etc/timezone
 
 # install chrony and place default conf which can be overridden with volume
-RUN apk add --no-cache chrony && mkdir -p /etc/chrony
+RUN apk add --no-cache chrony libfaketime
+RUN mkdir -p /etc/chrony
 COPY chrony.conf /etc/chrony/.
 
-# see https://github.com/trajano/alpine-libfaketime
-COPY --from=trajano/alpine-libfaketime  /faketime.so /lib/faketime.so
-ENV LD_PRELOAD=/lib/faketime.so
+ENV LD_PRELOAD=/usr/lib/faketime/libfaketime.so.1
 
 # port exposed
 EXPOSE 123/udp
